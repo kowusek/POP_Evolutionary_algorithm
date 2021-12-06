@@ -8,28 +8,38 @@ DEMNADS = np.zeros([])
 PATH_COUNT = 2
 MODULARITY = 0
 
+nodes = []
+links_dict = {}
+demands_dict = {}
+paths_dict = {}
+
 def main():
+    parseXMLFile("graf.xml")
+
+    print(nodes)
+    print("")
+    print(links_dict)
+    print("")
+    print(demands_dict)
+    print("")
+    print(paths_dict)
+    print("")
+def parseXMLFile(fileName):
 
     document = parse("graf.xml")
     root = document.documentElement
     cities = document.getElementsByTagName("node")
-    nodes = []
+    
     for city in cities:
         nodes.append(city.getAttribute('id'))
-    print(nodes)
-    print("")
 
     links = document.getElementsByTagName("link")
-    links_dict = {}
+    
     for link in links:
         source = link.getElementsByTagName('source')[0].firstChild.nodeValue
         target = link.getElementsByTagName('target')[0].firstChild.nodeValue
         links_dict[link.getAttribute("id")] = (source,target)
-    print(links_dict)
-    print("")
-
-    demands_dict = {}
-    paths_dict = {}
+    
     demands = document.getElementsByTagName("demand")
     for demand in demands:
         source = demand.getElementsByTagName('source')[0].firstChild.nodeValue
@@ -45,12 +55,6 @@ def main():
                 path.append(link.firstChild.nodeValue)
             paths.append(path)
         paths_dict[(source,target)] =paths
-
-    print(demands_dict)
-    print("")
-    print(paths_dict)
-
-
 
 if __name__=="__main__":
     main()
