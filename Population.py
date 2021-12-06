@@ -14,8 +14,16 @@ class Population:
         self.pathCount = pathCount
         self.modularity = modularity
         self.iterCount = iterCount
+        self.nodes = []
+        self.links_dict = {}
+        self.demands_dict = {}
+        self.paths_dict = {}
         self.loadData()
         self.initPopulation()
+        print(self.nodes)
+        print(self.links_dict)
+        print(self.demands_dict)
+        print(self.paths_dict)
 
     def loadData(self) -> None:
         document = parse("graf.xml")
