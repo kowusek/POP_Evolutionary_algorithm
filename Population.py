@@ -1,5 +1,6 @@
 from __future__ import annotations
 from Gene import Gene
+import random
 
 class Population:
     def __init__(self, popSize: int, mutationProb: int, crossProb: int, pathCount: int, modularity: int, iterCount: int) -> None:
@@ -18,7 +19,15 @@ class Population:
     def loadData(self) -> None:
         pass
 
-    def cross(self, gene) -> tuple[Gene, Gene]:
+    def cross(self, gene: Gene) -> tuple[Gene, Gene]:
+        subFunctions = (self._cross_aB, self._cross_Ab)
+        function = random.choice(subFunctions)
+        return function(gene)
+
+    def _cross_aB(self, gene: Gene) -> tuple[Gene, Gene]:
+        pass
+
+    def _cross_Ab(self, gene: Gene) -> tuple[Gene, Gene]:
         pass
 
     def mutate(self) -> None:

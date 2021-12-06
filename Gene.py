@@ -16,5 +16,5 @@ class Gene:
     def mutate(self) -> None:
         self.mutation(self)
 
-    def cross(self, gene) -> tuple[Gene, Gene]:
+    def cross(self, gene: Gene) -> tuple[Gene, Gene]:
         return self.crossover(self, gene)
