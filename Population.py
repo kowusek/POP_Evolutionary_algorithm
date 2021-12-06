@@ -1,13 +1,11 @@
-from _typeshed import NoneType
 from __future__ import annotations
-import numpy as np
 from Gene import Gene
 
 class Population:
     def __init__(self, popSize: int, mutationProb: int, crossProb: int, pathCount: int, modularity: int, iterCount: int) -> None:
-        self.genes = np.array([])
-        self.demandPaths = np.zeros([])
-        self.demands = np.zeros([])
+        self.genes = None
+        self.demandPaths = None
+        self.demands = None
         self.popSize = popSize
         self.mutationProb = mutationProb
         self.crossProb = crossProb
