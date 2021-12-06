@@ -10,7 +10,6 @@ class Gene:
         self.mutation = mutation
         self.crossover = crossover
 
-
     def calcFitness(self) -> None:
         self.calculateFitness(self)
 
