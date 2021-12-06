@@ -1,5 +1,4 @@
 from xml.dom.minidom import parse, parseString
-import numpy as np
 
 def main():
 
