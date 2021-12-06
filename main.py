@@ -1,5 +1,4 @@
-from xml.dom.minidom import parse, parseString
-
+from xml.dom.minidom import parse
 def main():
 
     document = parse("graf.xml")
