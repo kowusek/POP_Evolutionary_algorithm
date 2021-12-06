@@ -1,4 +1,12 @@
 from xml.dom.minidom import parse, parseString
+import numpy as np
+
+EDGE_COUNT = 12
+DEMAND_COUNT = 66
+DEMAND_PATHS = np.zeros([])
+DEMNADS = np.zeros([])
+PATH_COUNT = 2
+MODULARITY = 0
 
 def main():
 
