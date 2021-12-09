@@ -59,26 +59,20 @@ class Population:
                     tmpLink = linksDict[link.firstChild.nodeValue]
                     index = self.links.index(tmpLink)
                     path.append(index)
-                # self.demandPaths: [ path: [ 0 - index in self.links, ...], ...]
                 paths.append(path)
+            # self.demandPaths: [ path: [ 0 - index in self.links, ...], ...]
             self.demandPaths.append(paths)
 
-    def cross(self, gene: Gene) -> tuple[Gene, Gene]:
-        subFunctions = (self._crossFirst, self._crossSecond)
-        function = random.choice(subFunctions)
-        return function(gene)
-
-    def _crossFirst(self, gene: Gene, gene2: Gene) -> tuple[Gene, Gene]:
-        pass
-
-    def _crossSecond(self, gene: Gene, gene2: Gene) -> tuple[Gene, Gene]:
-        pass
+    def cross(self, gene: Gene, gene2: Gene) -> None:
+        index = np.random.choice(len(gene.data), 1, replace=False)
+        tmp = gene2.data[:index].copy()
+        gene2.data[:index], gene.data[:index] = gene.data[:index], tmp
 
     def mutate(self, gene: Gene) -> None:
         elemToMutate = int(len(gene.data) * self.mutationProb)
         indecies = np.random.choice(len(gene.data), elemToMutate, replace=False)
         for index in indecies:
-            gene.data[index] = np.random.dirichlet(np.ones(len(gene.data)),size=1).squeeze()
+            gene.data[index] = np.random.dirichlet(np.ones(len(gene.data[index])),size=1).squeeze()
 
     def calcFitness(self, gene: Gene) -> None:
         links = np.zeros(len(self.links))
@@ -89,7 +83,7 @@ class Population:
                     links[link] += value * demand
         for link in links:
             moduleCount += math.ceil(link / self.modularity)
-        gene.fintess = moduleCount
+        gene.fitness = moduleCount
 
     def initGene(self, gene: Gene) -> None:
         demands = []
@@ -119,7 +113,7 @@ class Population:
         for x in range(howMany):
             choice1 = np.random.choice(self.genes, 1, p=probabilities).item(0)
             choice2 = np.random.choice(self.genes, 1, p=probabilities).item(0)
-            if(choice1.fitness > choice2.fitness):
+            if(choice1.fitness < choice2.fitness):
                 choices.append(choice1)
             else:
                 choices.append(choice2)
