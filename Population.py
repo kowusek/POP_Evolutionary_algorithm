@@ -92,13 +92,26 @@ class Population:
         for i in range(self.popSize):
             self.genes.append(Gene(self.calcFitness, self.mutate, self.cross, self.initGene))
 
-    def tournamentSelection(self) -> None:
-        pass
+    def tournamentSelection(self,a,k,howMany) -> None:
+        probabilities = []
+        self.genes.sort(key=lambda x: x.fitness, reverse=True)
+        probabilitiesSum = 0
+        for idx,gene in enumerate(self.genes):
+            probability = a + k*(1-idx/self.popSize)
+            probabilitiesSum = probabilitiesSum+ probability
+            probabilities.append(probability)
+        for idx,probability in enumerate(probabilities):
+            probabilities[idx] = probabilities[idx]/probabilitiesSum
+        choices = np.random.choice(self.genes, howMany, p=probabilities)
+        return choices
+        
 
 if __name__ == "__main__":
 
     def main():
         p = Population(100, 10, 50, 3, 1, 1000)
-
+        choices = p.tournamentSelection(1,10,100)
+        for c in choices:
+            print(c.fitness)
     if __name__=="__main__":
         main()
