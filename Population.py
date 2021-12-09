@@ -64,29 +64,33 @@ class Population:
         function = random.choice(subFunctions)
         return function(gene)
 
-    def _crossFirst(self, gene: Gene) -> tuple[Gene, Gene]:
+    def _crossFirst(self, gene: Gene, gene2: Gene) -> tuple[Gene, Gene]:
         pass
 
-    def _crossSecond(self, gene: Gene) -> tuple[Gene, Gene]:
+    def _crossSecond(self, gene: Gene, gene2: Gene) -> tuple[Gene, Gene]:
         pass
 
-    def mutate(self) -> None:
+    def mutate(self, gene: Gene) -> None:
         pass
 
-    def calcFitness(self) -> None:
-        pass
+    def calcFitness(self, gene: Gene) -> None:
+        links = np.zeros(len(self.links))
+        for demand in gene.data:
+            pass
 
     def initGene(self, gene: Gene) -> None:
         demands = []
         for demand in self.demands:
-                pathCount = len(self.paths[demand])
-                demands.append(np.random.dirichlet(np.ones(pathCount),size=1))
-        gene.data = demands
+                if self.pathCount > 0 and self.pathCount < len(self.paths[demand]):
+                    pathCount = self.pathCount
+                else:
+                    pathCount = len(self.paths[demand])
+                demands.append(np.random.dirichlet(np.ones(pathCount),size=1).squeeze())
+        gene.data = np.array(demands)
     
     def initPopulation(self) -> None:
         for i in range(self.popSize):
             self.genes.append(Gene(self.calcFitness, self.mutate, self.cross, self.initGene))
-
 
     def tournamentSelection(self) -> None:
         pass
