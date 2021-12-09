@@ -2,7 +2,7 @@ from __future__ import annotations
 
 class Gene:
     def __init__(self, calculateFitness: function, mutation: function, crossover: function, init: function) -> None:
-        self.gene = None
+        self.data = None
         self.fintess = 0
         self.calculateFitness = calculateFitness
         self.mutation = mutation
