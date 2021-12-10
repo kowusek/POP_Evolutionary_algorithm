@@ -1,12 +1,12 @@
 from __future__ import annotations
 from Gene import Gene
-import random
 from xml.dom.minidom import parse
 import numpy as np
 import math
+from copy import deepcopy
 
 class Population:
-    def __init__(self, popSize: int, mutationProb: int, crossProb: int, pathCount: int, modularity: int, iterCount: int) -> None:
+    def __init__(self, popSize: int, mutationProb: float, crossProb: float, pathCount: int, modularity: int, iterCount: int) -> None:
         self.nodes = []
         self.links = []
         self.demands = []
@@ -70,7 +70,7 @@ class Population:
 
     def mutate(self, gene: Gene) -> None:
         elemToMutate = int(len(gene.data) * self.mutationProb)
-        indecies = np.random.choice(len(gene.data), elemToMutate, replace=False)
+        indecies = np.random.choice(len(gene.data), elemToMutate)
         for index in indecies:
             gene.data[index] = np.random.dirichlet(np.ones(len(gene.data[index])),size=1).squeeze()
 
@@ -99,11 +99,11 @@ class Population:
         for i in range(self.popSize):
             self.genes.append(Gene(self.calcFitness, self.mutate, self.cross, self.initGene))
 
-    def tournamentSelection(self,a,k,howMany) -> None:
+    def tournamentSelection(self,popList,a,k,howMany) -> None:
         probabilities = []
-        self.genes.sort(key=lambda x: x.fitness, reverse=True)
+        popList.sort(key=lambda x: x.fitness, reverse=True)
         probabilitiesSum = 0
-        for idx,gene in enumerate(self.genes):
+        for idx,gene in enumerate(popList):
             probability = a + k*(1-idx/self.popSize)
             probabilitiesSum = probabilitiesSum+ probability
             probabilities.append(probability)
@@ -111,14 +111,29 @@ class Population:
             probabilities[idx] = probabilities[idx]/probabilitiesSum
         choices = []
         for x in range(howMany):
-            choice1 = np.random.choice(self.genes, 1, p=probabilities).item(0)
-            choice2 = np.random.choice(self.genes, 1, p=probabilities).item(0)
+            choice1 = np.random.choice(popList, 1, p=probabilities).item(0)
+            choice2 = np.random.choice(popList, 1, p=probabilities).item(0)
             if(choice1.fitness < choice2.fitness):
                 choices.append(choice1)
             else:
                 choices.append(choice2)
         return choices
         
+    def startEvolution(self):
+        for i in range(self.iterCount):
+            selectedGenes = self.tournamentSelection(self.genes, 1, 10, self.popSize - 10)
+            #bestSoFar = deepcopy(self.genes[-2:])
+            bestFitness = self.genes[-1].fitness
+            for gene in selectedGenes:
+                gene.mutate()
+                gene.calcFitness()
+                if gene.fitness < bestFitness:
+                    bestFitness = gene.fitness
+            self.genes = selectedGenes# + bestSoFar
+            print(bestFitness)
+
+
+
 
 if __name__ == "__main__":
 
