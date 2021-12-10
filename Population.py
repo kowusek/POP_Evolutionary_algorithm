@@ -3,7 +3,6 @@ from Gene import Gene
 from xml.dom.minidom import parse
 import numpy as np
 import math
-from copy import deepcopy
 
 class Population:
     def __init__(self, popSize: int, mutationProb: float, crossProb: float, pathCount: int, modularity: int, iterCount: int) -> None:
@@ -15,7 +14,7 @@ class Population:
         self.demandKeys = []
         self.probabilities = []
         self.choices = []
-        for x in range(popSize):
+        for x in range(popSize - int(popSize / 10)):
             self.choices.append(None)
         self.popSize = popSize
         self.mutationProb = mutationProb
@@ -126,18 +125,18 @@ class Population:
                 self.choices[x] = choice2
         
     def startEvolution(self):
-        bestGene = deepcopy(self.genes[0])
+        bestGenes = []
         bestFitness = self.genes[0].fitness
         for i in range(self.iterCount):
-            self.tournamentSelection(self.popSize)
-            self.genes = self.choices
+            self.tournamentSelection(self.popSize - int(self.popSize / 10))
+            bestGenes = self.genes[:-int(self.popSize / 10) - 1:-1].copy()
+            self.genes = self.choices.copy()
             for gene in self.genes:
                 gene.mutate()
                 gene.calcFitness()
                 if gene.fitness < bestFitness:
                     bestFitness = gene.fitness
-                    bestGene = deepcopy(gene)
-            self.genes[0] = bestGene
+            self.genes += bestGenes
             print(bestFitness)
 
 
