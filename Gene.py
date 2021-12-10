@@ -11,11 +11,10 @@ class Gene:
         self.calcFitness()
 
     def calcFitness(self) -> None:
-        self.fitness = random.randint(1, 100)
-        #self.calculateFitness(self)
+        self.calculateFitness(self)
 
     def mutate(self) -> None:
         self.mutation(self)
 
-    def cross(self, gene: Gene) -> tuple[Gene, Gene]:
+    def cross(self, gene: Gene) -> None:
         return self.crossover(self, gene)

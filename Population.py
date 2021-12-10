@@ -3,14 +3,16 @@ from Gene import Gene
 import random
 from xml.dom.minidom import parse
 import numpy as np
+import math
 
 class Population:
     def __init__(self, popSize: int, mutationProb: int, crossProb: int, pathCount: int, modularity: int, iterCount: int) -> None:
         self.nodes = []
         self.links = []
-        self.demands = {}
-        self.paths = {}
+        self.demands = []
+        self.demandPaths = []
         self.genes = []
+        self.demandKeys = []
         self.popSize = popSize
         self.mutationProb = mutationProb
         self.crossProb = crossProb
@@ -45,8 +47,10 @@ class Population:
             demandValue = demand.getElementsByTagName('demandValue')[0].firstChild.nodeValue
             source = self.nodes.index(source)
             target = self.nodes.index(target)
-            # self.demands: {(0 - index in self.nodes, 2 - index in self.nodes) : 100}
-            self.demands[(source, target)] = demandValue
+            # self.demandKeys: [(0 - index in self.nodes, 2 - index in self.nodes), ...]
+            self.demandKeys.append((source, target))
+            # self.demands: [100, ...]
+            self.demands.append(int(demandValue.replace('.0', '')))
 
             paths = []
             for admissiblePath in demand.getElementsByTagName('admissiblePath'):
@@ -56,35 +60,38 @@ class Population:
                     index = self.links.index(tmpLink)
                     path.append(index)
                 paths.append(path)
-            # self.paths: {(0 - index in self.nodes, 2 - index in self.nodes) : [[ 0 - index in self.links, ...], ...]}
-            self.paths[(source,target)] = paths
+            # self.demandPaths: [ path: [ 0 - index in self.links, ...], ...]
+            self.demandPaths.append(paths)
 
-    def cross(self, gene: Gene) -> tuple[Gene, Gene]:
-        subFunctions = (self._crossFirst, self._crossSecond)
-        function = random.choice(subFunctions)
-        return function(gene)
-
-    def _crossFirst(self, gene: Gene, gene2: Gene) -> tuple[Gene, Gene]:
-        pass
-
-    def _crossSecond(self, gene: Gene, gene2: Gene) -> tuple[Gene, Gene]:
-        pass
+    def cross(self, gene: Gene, gene2: Gene) -> None:
+        index = np.random.choice(len(gene.data), 1, replace=False)
+        tmp = gene2.data[:index].copy()
+        gene2.data[:index], gene.data[:index] = gene.data[:index], tmp
 
     def mutate(self, gene: Gene) -> None:
-        pass
+        elemToMutate = int(len(gene.data) * self.mutationProb)
+        indecies = np.random.choice(len(gene.data), elemToMutate, replace=False)
+        for index in indecies:
+            gene.data[index] = np.random.dirichlet(np.ones(len(gene.data[index])),size=1).squeeze()
 
     def calcFitness(self, gene: Gene) -> None:
         links = np.zeros(len(self.links))
-        for demand in gene.data:
-            pass
+        moduleCount = 0
+        for demand, genePaths, paths in zip(self.demands, gene.data, self.demandPaths):
+            for value, path in zip(genePaths, paths):
+                for link in path:
+                    links[link] += value * demand
+        for link in links:
+            moduleCount += math.ceil(link / self.modularity)
+        gene.fitness = moduleCount
 
     def initGene(self, gene: Gene) -> None:
         demands = []
-        for demand in self.demands:
-                if self.pathCount > 0 and self.pathCount < len(self.paths[demand]):
+        for paths in self.demandPaths:
+                if self.pathCount > 0 and self.pathCount < len(paths):
                     pathCount = self.pathCount
                 else:
-                    pathCount = len(self.paths[demand])
+                    pathCount = len(paths)
                 demands.append(np.random.dirichlet(np.ones(pathCount),size=1).squeeze())
         gene.data = np.array(demands)
     
