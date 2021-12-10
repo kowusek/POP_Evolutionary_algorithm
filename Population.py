@@ -123,7 +123,11 @@ class Population:
                 self.choices[x] = choice1
             else:
                 self.choices[x] = choice2
-        
+
+    def pairwise(self, iterable):
+        a = iter(iterable)
+        return zip(a, a)
+
     def startEvolution(self):
         bestGenes = []
         bestFitness = self.genes[0].fitness
@@ -131,6 +135,10 @@ class Population:
             self.tournamentSelection(self.popSize - int(self.popSize / 10))
             bestGenes = self.genes[:-int(self.popSize / 10) - 1:-1].copy()
             self.genes = self.choices.copy()
+            elemToCross = int(len(self.genes) * self.crossProb)
+            indices = np.random.choice(len(self.genes), elemToCross, replace=False)
+            for a, b in self.pairwise(indices):
+                self.genes[a].cross(self.genes[b])
             for gene in self.genes:
                 gene.mutate()
                 gene.calcFitness()
