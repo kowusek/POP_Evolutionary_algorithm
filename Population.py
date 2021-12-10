@@ -80,7 +80,7 @@ class Population:
             gene.data[index] = np.random.dirichlet(np.ones(len(gene.data[index])),size=1).squeeze()
 
     def calcFitness(self, gene: Gene) -> None:
-        links = np.zeros(len(self.links))
+        links = [0] * len(self.links)
         moduleCount = 0
         for demand, genePaths, paths in zip(self.demands, gene.data, self.demandPaths):
             for value, path in zip(genePaths, paths):
@@ -126,17 +126,18 @@ class Population:
                 self.choices[x] = choice2
         
     def startEvolution(self):
+        bestGene = deepcopy(self.genes[0])
+        bestFitness = self.genes[0].fitness
         for i in range(self.iterCount):
             self.tournamentSelection(self.popSize)
             self.genes = self.choices
-            #bestSoFar = deepcopy(self.genes[-2:])
-            bestFitness = self.genes[-1].fitness
             for gene in self.genes:
                 gene.mutate()
                 gene.calcFitness()
                 if gene.fitness < bestFitness:
                     bestFitness = gene.fitness
-            #self.genes = selectedGenes# + bestSoFar
+                    bestGene = deepcopy(gene)
+            self.genes[0] = bestGene
             print(bestFitness)
 
 
