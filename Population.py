@@ -94,7 +94,7 @@ class Population:
 
     def tournamentSelection(self,a,k,howMany) -> None:
         probabilities = []
-        self.genes.sort(key=lambda x: x.fitness, reverse=True)
+        self.genes.sort(key=lambda x: x.fitness)
         probabilitiesSum = 0
         for idx,gene in enumerate(self.genes):
             probability = a + k*(1-idx/self.popSize)
@@ -106,7 +106,7 @@ class Population:
         for x in range(howMany):
             choice1 = np.random.choice(self.genes, 1, p=probabilities).item(0)
             choice2 = np.random.choice(self.genes, 1, p=probabilities).item(0)
-            if(choice1.fitness > choice2.fitness):
+            if(choice1.fitness < choice2.fitness):
                 choices.append(choice1)
             else:
                 choices.append(choice2)
@@ -118,6 +118,7 @@ if __name__ == "__main__":
     def main():
         p = Population(100, 10, 50, 3, 1, 1000)
         choices = p.tournamentSelection(1,10,10)
+        print("----------------------------")
         for c in choices:
             print(c.fitness)
     if __name__=="__main__":
