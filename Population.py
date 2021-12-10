@@ -13,12 +13,17 @@ class Population:
         self.demandPaths = []
         self.genes = []
         self.demandKeys = []
+        self.probabilities = []
+        self.choices = []
+        for x in range(popSize):
+            self.choices.append(None)
         self.popSize = popSize
         self.mutationProb = mutationProb
         self.crossProb = crossProb
         self.pathCount = pathCount
         self.modularity = modularity
         self.iterCount = iterCount
+        self.calculateProbabilities(1,10)
         self.loadData()
         self.initPopulation()
         pass
@@ -98,35 +103,32 @@ class Population:
     def initPopulation(self) -> None:
         for i in range(self.popSize):
             self.genes.append(Gene(self.calcFitness, self.mutate, self.cross, self.initGene))
-
-    def tournamentSelection(self,a,k,howMany) -> None:
-        probabilities = []
-        self.genes.sort(key=lambda x: x.fitness)
+    def calculateProbabilities(self,a,k):
         probabilitiesSum = 0
-        for idx,gene in enumerate(self.genes):
-            probability = a + k*(1-idx/self.popSize)
+        for i in range(self.popSize):
+            probability = a + k*(1-i/self.popSize)
             probabilitiesSum = probabilitiesSum+ probability
-            probabilities.append(probability)
-        for idx,probability in enumerate(probabilities):
-            probabilities[idx] = probabilities[idx]/probabilitiesSum
-        choices = []
+            self.probabilities.append(probability)
+        for i in range(self.popSize):
+            self.probabilities[i] = self.probabilities[i]/probabilitiesSum
+    def tournamentSelection(self,howMany) -> None:
+        self.genes.sort(key=lambda x: x.fitness)
         for x in range(howMany):
-            choice1 = np.random.choice(self.genes, 1, p=probabilities).item(0)
-            choice2 = np.random.choice(self.genes, 1, p=probabilities).item(0)
+            choice1 = np.random.choice(self.genes, 1, p=self.probabilities).item(0)
+            choice2 = np.random.choice(self.genes, 1, p=self.probabilities).item(0)
             if(choice1.fitness < choice2.fitness):
-                choices.append(choice1)
+                self.choices[x] = choice1
             else:
-                choices.append(choice2)
-        return choices
+                self.choices[x] = choice2
         
 
 if __name__ == "__main__":
 
     def main():
         p = Population(100, 10, 50, 3, 1, 1000)
-        choices = p.tournamentSelection(1,10,10)
+        p.tournamentSelection(100)
         print("----------------------------")
-        for c in choices:
+        for c in p.choices:
             print(c.fitness)
     if __name__=="__main__":
         main()
