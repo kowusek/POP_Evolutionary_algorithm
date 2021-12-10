@@ -69,7 +69,7 @@ class Population:
             self.demandPaths.append(paths)
 
     def cross(self, gene: Gene, gene2: Gene) -> None:
-        index = np.random.choice(len(gene.data), 1, replace=False)
+        index = np.random.choice(len(gene.data), 1, replace=False)[0]
         tmp = gene2.data[:index].copy()
         gene2.data[:index], gene.data[:index] = gene.data[:index], tmp
 
@@ -116,8 +116,10 @@ class Population:
     def tournamentSelection(self,howMany) -> None:
         self.genes.sort(key=lambda x: x.fitness)
         for x in range(howMany):
-            choice1 = np.random.choice(self.genes, 1, p=self.probabilities).item(0)
-            choice2 = np.random.choice(self.genes, 1, p=self.probabilities).item(0)
+            index1 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
+            index2 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
+            choice1 = self.genes[index1]
+            choice2 = self.genes[index2]
             if(choice1.fitness < choice2.fitness):
                 self.choices[x] = choice1
             else:
