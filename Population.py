@@ -117,15 +117,23 @@ class Population:
     
     def tournamentSelection(self,howMany) -> None:
         self.genes.sort(key=lambda x: x.fitness)
-        for x in range(howMany):
-            index1 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
-            index2 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
-            choice1 = self.genes[index1]
-            choice2 = self.genes[index2]
-            if(choice1.fitness < choice2.fitness):
-                self.choices[x] = choice1
+        chosen = np.random.choice(len(self.genes), howMany*2, p=self.probabilities, replace=True)
+        i = 0
+        for x in range(0,howMany*2,2):
+            if(self.genes[chosen[x]].fitness < self.genes[chosen[x+1]].fitness):
+                self.choices[i] = self.genes[chosen[x]]
             else:
-                self.choices[x] = choice2
+                self.choices[i] = self.genes[chosen[x+1]]
+            i = i+1
+        #for x in range(howMany):
+        #    index1 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
+        #    index2 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
+        #    choice1 = self.genes[index1]
+        #    choice2 = self.genes[index2]
+        #    if(choice1.fitness < choice2.fitness):
+        #        self.choices[x] = choice1
+        #    else:
+        #        self.choices[x] = choice2
         #print("Turniej:")
         #print(self.choices)
 
@@ -141,8 +149,8 @@ class Population:
             bestGenes = copy.deepcopy(self.genes[:int(self.popSize / 10)])
             #print("Best Genes before :")
             #for gene in bestGenes:
-                #print(gene.fitness)
-                #print(gene)
+            #    print(gene.fitness)
+            #    print(gene)
             self.genes = copy.deepcopy(self.choices)
             elemToCross = int(len(self.genes) * self.crossProb)
             indices = np.random.choice(len(self.genes), elemToCross, replace=False)
@@ -164,7 +172,7 @@ class Population:
                 #print(gene.fitness)
             #print("-------------")
             #for gene in self.genes:
-                #print(gene.fitness)
+            #    print(gene.fitness)
             #print(self.genes)
             #print("------------")
             if i%10 == 0:
