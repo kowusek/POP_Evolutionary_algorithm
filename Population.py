@@ -1,5 +1,6 @@
 from __future__ import annotations
 from Gene import Gene
+import copy
 from xml.dom.minidom import parse
 import numpy as np
 import math
@@ -102,6 +103,8 @@ class Population:
     def initPopulation(self) -> None:
         for i in range(self.popSize):
             self.genes.append(Gene(self.calcFitness, self.mutate, self.cross, self.initGene))
+        #print("Init:")
+        #print(self.genes)
     
     def calculateProbabilities(self,a,k):
         probabilitiesSum = 0
@@ -123,6 +126,8 @@ class Population:
                 self.choices[x] = choice1
             else:
                 self.choices[x] = choice2
+        #print("Turniej:")
+        #print(self.choices)
 
     def pairwise(self, iterable):
         a = iter(iterable)
@@ -133,19 +138,37 @@ class Population:
         bestFitness = self.genes[0].fitness
         for i in range(self.iterCount):
             self.tournamentSelection(self.popSize - int(self.popSize / 10))
-            bestGenes = self.genes[:-int(self.popSize / 10) - 1:-1].copy()
-            self.genes = self.choices.copy()
+            bestGenes = copy.deepcopy(self.genes[:int(self.popSize / 10)])
+            #print("Best Genes before :")
+            #for gene in bestGenes:
+                #print(gene.fitness)
+                #print(gene)
+            self.genes = copy.deepcopy(self.choices)
             elemToCross = int(len(self.genes) * self.crossProb)
             indices = np.random.choice(len(self.genes), elemToCross, replace=False)
             for a, b in self.pairwise(indices):
                 self.genes[a].cross(self.genes[b])
+            #print("Operatory genetyczne")
             for gene in self.genes:
+                #print( str(i) +" Przed:")
+                #print(gene.fitness)
                 gene.mutate()
                 gene.calcFitness()
                 if gene.fitness < bestFitness:
                     bestFitness = gene.fitness
+                #print("Po:")
+                #print(gene.fitness)
             self.genes += bestGenes
-            print(bestFitness)
+            #print("Best Genes after :")
+            #for gene in bestGenes:
+                #print(gene.fitness)
+            #print("-------------")
+            #for gene in self.genes:
+                #print(gene.fitness)
+            #print(self.genes)
+            #print("------------")
+            if i%10 == 0:
+                print(str(i) +", "+str(bestFitness))
 
 
 

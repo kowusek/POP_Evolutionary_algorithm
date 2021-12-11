@@ -1,5 +1,6 @@
 from __future__ import annotations
 import random
+import copy
 class Gene:
     def __init__(self, calculateFitness: function, mutation: function, crossover: function, init: function) -> None:
         self.data = None
@@ -9,6 +10,16 @@ class Gene:
         self.crossover = crossover
         init(self)
         self.calcFitness()
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        result.data = copy.deepcopy(self.data)
+        result.fitness = copy.deepcopy(self.fitness)
+        result.calculateFitness = self.calculateFitness
+        result.mutation = self.mutation
+        result.crossover = self.crossover
+        return result
 
     def calcFitness(self) -> None:
         self.calculateFitness(self)
