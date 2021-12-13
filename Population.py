@@ -6,7 +6,7 @@ import numpy as np
 import math
 
 class Population:
-    def __init__(self, popSize: int, mutationProb: float, crossProb: float, pathCount: int, modularity: int, iterCount: int) -> None:
+    def __init__(self, popSize: int, pathCount: int) -> None:
         self.nodes = []
         self.links = []
         self.demands = []
@@ -14,19 +14,12 @@ class Population:
         self.genes = []
         self.demandKeys = []
         self.probabilities = []
-        self.choices = []
-        for x in range(popSize - int(popSize / 10)):
-            self.choices.append(None)
+        self.choices = [0] * (popSize - int(popSize / 10))
         self.popSize = popSize
-        self.mutationProb = mutationProb
-        self.crossProb = crossProb
         self.pathCount = pathCount
-        self.modularity = modularity
-        self.iterCount = iterCount
         self.calculateProbabilities(1,10)
         self.loadData()
         self.initPopulation()
-        pass
 
     def loadData(self) -> None:
         document = parse("graf.xml")
@@ -141,9 +134,18 @@ class Population:
         a = iter(iterable)
         return zip(a, a)
 
-    def startEvolution(self):
+    def startEvolution(self, mutationProb: float, crossProb: float, iterCount: int, modularity: int):
+        self.mutationProb = mutationProb
+        self.crossProb = crossProb
+        self.iterCount = iterCount
+        self.modularity = modularity
         bestGenes = []
+
+        for gene in self.genes:
+            gene.calcFitness()
+
         bestFitness = self.genes[0].fitness
+        
         for i in range(self.iterCount):
             self.tournamentSelection(self.popSize - int(self.popSize / 10))
             bestGenes = copy.deepcopy(self.genes[:int(self.popSize / 10)])
@@ -175,11 +177,35 @@ class Population:
             #    print(gene.fitness)
             #print(self.genes)
             #print("------------")
-            if i%10 == 0:
+            if i % 10 == 0:
                 print(str(i) +", "+str(bestFitness))
 
+    def evolution(self, mutationProb: float, crossProb: float, iterCount: int, modularity: int):
+        self.mutationProb = mutationProb
+        self.crossProb = crossProb
+        self.iterCount = iterCount
+        self.modularity = modularity
 
+        for gene in self.genes:
+            gene.calcFitness()
 
+        bestFitness = self.genes[0].fitness
+
+        for i in range(self.iterCount):
+            self.tournamentSelection(self.popSize - int(self.popSize / 10))
+            bestGenes = copy.deepcopy(self.genes[:int(self.popSize / 10)])
+            self.genes = copy.deepcopy(self.choices)
+            elemToCross = int(len(self.genes) * self.crossProb)
+            indices = np.random.choice(len(self.genes), elemToCross, replace=False)
+            for a, b in self.pairwise(indices):
+                self.genes[a].cross(self.genes[b])
+            for gene in self.genes:
+                gene.mutate()
+                gene.calcFitness()
+                if gene.fitness < bestFitness:
+                    bestFitness = gene.fitness
+            self.genes += bestGenes
+            yield i, bestFitness
 
 if __name__ == "__main__":
 

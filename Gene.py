@@ -9,7 +9,8 @@ class Gene:
         self.mutation = mutation
         self.crossover = crossover
         init(self)
-        self.calcFitness()
+        #self.calcFitness()
+    
     def __deepcopy__(self, memo):
         cls = self.__class__
         result = cls.__new__(cls)
