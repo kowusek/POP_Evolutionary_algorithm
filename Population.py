@@ -177,8 +177,9 @@ class Population:
             #    print(gene.fitness)
             #print(self.genes)
             #print("------------")
-            if i % 10 == 0:
-                print(str(i) +", "+str(bestFitness))
+            #if i % 10 == 0:
+            #    print(str(i) +", "+str(bestFitness))
+        return bestFitness
 
     def evolution(self, mutationProb: float, crossProb: float, iterCount: int, modularity: int):
         self.mutationProb = mutationProb
