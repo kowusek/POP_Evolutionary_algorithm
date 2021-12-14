@@ -6,7 +6,7 @@ import numpy as np
 import math
 
 class Population:
-    def __init__(self, popSize: int, pathCount: int) -> None:
+    def __init__(self, popSize: int, agregation: bool) -> None:
         self.nodes = []
         self.links = []
         self.demands = []
@@ -16,10 +16,9 @@ class Population:
         self.probabilities = []
         self.choices = [0] * (popSize - int(popSize / 10))
         self.popSize = popSize
-        self.pathCount = pathCount
         self.calculateProbabilities(1,10)
         self.loadData()
-        self.initPopulation()
+        self.initPopulation(agregation)
 
     def loadData(self) -> None:
         document = parse("graf.xml")
@@ -62,15 +61,24 @@ class Population:
             self.demandPaths.append(paths)
 
     def cross(self, gene: Gene, gene2: Gene) -> None:
-        index = np.random.choice(len(gene.data), 1, replace=False)[0]
+        index = np.random.choice(len(gene.data), 1)[0]
         tmp = gene2.data[:index].copy()
         gene2.data[:index], gene.data[:index] = gene.data[:index], tmp
 
     def mutate(self, gene: Gene) -> None:
         elemToMutate = int(len(gene.data) * self.mutationProb)
-        indecies = np.random.choice(len(gene.data), elemToMutate)
+        indecies = np.random.choice(len(gene.data), elemToMutate, replace = False)
         for index in indecies:
             gene.data[index] = np.random.dirichlet(np.ones(len(gene.data[index])),size=1).squeeze()
+
+    def mutateAgregation(self, gene: Gene) -> None:
+        elemToMutate = int(len(gene.data) * self.mutationProb)
+        indecies = np.random.choice(len(gene.data), elemToMutate, replace = False)
+        for index in indecies:
+            temp = np.zeros(len(gene.data[index]))
+            indexToFlip = np.random.choice(len(gene.data[index]), 1)
+            temp[indexToFlip] = 1
+            gene.data[index] = temp
 
     def calcFitness(self, gene: Gene) -> None:
         links = [0] * len(self.links)
@@ -86,18 +94,25 @@ class Population:
     def initGene(self, gene: Gene) -> None:
         demands = []
         for paths in self.demandPaths:
-                if self.pathCount > 0 and self.pathCount < len(paths):
-                    pathCount = self.pathCount
-                else:
-                    pathCount = len(paths)
-                demands.append(np.random.dirichlet(np.ones(pathCount),size=1).squeeze())
+                demands.append(np.random.dirichlet(np.ones(len(paths)),size=1).squeeze())
         gene.data = np.array(demands)
     
-    def initPopulation(self) -> None:
-        for i in range(self.popSize):
-            self.genes.append(Gene(self.calcFitness, self.mutate, self.cross, self.initGene))
-        #print("Init:")
-        #print(self.genes)
+    def initGeneAgregation(self, gene: Gene) -> None:
+        demands = []
+        for paths in self.demandPaths:
+                index = np.random.choice(len(paths), 1)
+                temp = np.zeros(len(paths))
+                temp[index] = 1
+                demands.append(temp)
+        gene.data = np.array(demands)
+
+    def initPopulation(self, agregation: bool) -> None:
+        if agregation:
+            for i in range(self.popSize):
+                self.genes.append(Gene(self.calcFitness, self.mutateAgregation, self.cross, self.initGeneAgregation))
+        else:
+            for i in range(self.popSize):
+                self.genes.append(Gene(self.calcFitness, self.mutate, self.cross, self.initGene))
     
     def calculateProbabilities(self,a,k):
         probabilitiesSum = 0
@@ -110,7 +125,7 @@ class Population:
     
     def tournamentSelection(self,howMany) -> None:
         self.genes.sort(key=lambda x: x.fitness)
-        chosen = np.random.choice(len(self.genes), howMany*2, p=self.probabilities, replace=True)
+        chosen = np.random.choice(len(self.genes), howMany*2, p=self.probabilities)
         i = 0
         for x in range(0,howMany*2,2):
             if(self.genes[chosen[x]].fitness < self.genes[chosen[x+1]].fitness):
@@ -119,8 +134,8 @@ class Population:
                 self.choices[i] = self.genes[chosen[x+1]]
             i = i+1
         #for x in range(howMany):
-        #    index1 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
-        #    index2 = np.random.choice(len(self.genes), 1, p=self.probabilities, replace=False)[0]
+        #    index1 = np.random.choice(len(self.genes), 1, p=self.probabilities)[0]
+        #    index2 = np.random.choice(len(self.genes), 1, p=self.probabilities)[0]
         #    choice1 = self.genes[index1]
         #    choice2 = self.genes[index2]
         #    if(choice1.fitness < choice2.fitness):
@@ -149,36 +164,17 @@ class Population:
         for i in range(self.iterCount):
             self.tournamentSelection(self.popSize - int(self.popSize / 10))
             bestGenes = copy.deepcopy(self.genes[:int(self.popSize / 10)])
-            #print("Best Genes before :")
-            #for gene in bestGenes:
-            #    print(gene.fitness)
-            #    print(gene)
             self.genes = copy.deepcopy(self.choices)
             elemToCross = int(len(self.genes) * self.crossProb)
-            indices = np.random.choice(len(self.genes), elemToCross, replace=False)
+            indices = np.random.choice(len(self.genes), elemToCross)
             for a, b in self.pairwise(indices):
                 self.genes[a].cross(self.genes[b])
-            #print("Operatory genetyczne")
             for gene in self.genes:
-                #print( str(i) +" Przed:")
-                #print(gene.fitness)
                 gene.mutate()
                 gene.calcFitness()
                 if gene.fitness < bestFitness:
                     bestFitness = gene.fitness
-                #print("Po:")
-                #print(gene.fitness)
             self.genes += bestGenes
-            #print("Best Genes after :")
-            #for gene in bestGenes:
-                #print(gene.fitness)
-            #print("-------------")
-            #for gene in self.genes:
-            #    print(gene.fitness)
-            #print(self.genes)
-            #print("------------")
-            #if i % 10 == 0:
-            #    print(str(i) +", "+str(bestFitness))
         return bestFitness
 
     def evolution(self, mutationProb: float, crossProb: float, iterCount: int, modularity: int):
@@ -197,7 +193,7 @@ class Population:
             bestGenes = copy.deepcopy(self.genes[:int(self.popSize / 10)])
             self.genes = copy.deepcopy(self.choices)
             elemToCross = int(len(self.genes) * self.crossProb)
-            indices = np.random.choice(len(self.genes), elemToCross, replace=False)
+            indices = np.random.choice(len(self.genes), elemToCross)
             for a, b in self.pairwise(indices):
                 self.genes[a].cross(self.genes[b])
             for gene in self.genes:
