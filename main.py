@@ -3,7 +3,7 @@ import numpy as np
 import time
 import cProfile
 def main():
-    p = Population(100, False)
+    p = Population(100, True)
     p.startEvolution(0.02, 8.0, 100, 1)
 
 if __name__=="__main__":
