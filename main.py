@@ -3,8 +3,9 @@ import numpy as np
 import time
 import cProfile
 def main():
-    p = Population(100, False)
+    p = Population(10, False)
     p.startEvolution(0.02, 8.0, 100, 1)
+    p.printBest()
 
 if __name__=="__main__":
     #cProfile.run('main()')

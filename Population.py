@@ -7,6 +7,7 @@ import math
 
 class Population:
     def __init__(self, popSize: int, agregation: bool) -> None:
+        self.best = None
         self.nodes = []
         self.links = []
         self.demands = []
@@ -165,7 +166,7 @@ class Population:
         for gene in self.genes:
             gene.calcFitness()
 
-        bestFitness = self.genes[0].fitness
+        best = self.genes[0]
         
         for i in range(self.iterCount):
             self.tournamentSelection(self.popSize - int(self.popSize / 10))
@@ -178,10 +179,11 @@ class Population:
             for gene in self.genes:
                 gene.mutate()
                 gene.calcFitness()
-                if gene.fitness < bestFitness:
-                    bestFitness = gene.fitness
+                if gene.fitness < best.fitness:
+                    best = gene
             self.genes += bestGenes
-        return bestFitness
+        self.best = best
+        return best.fitness
 
     def evolution(self, mutationProb: float, crossProb: float, iterCount: int, modularity: int):
         self.mutationProb = mutationProb
@@ -208,7 +210,14 @@ class Population:
                 if gene.fitness < bestFitness:
                     bestFitness = gene.fitness
             self.genes += bestGenes
-            yield i, bestFitness
+            yield i, 
+    def printBest(self):
+        idx = 0
+        for demands,keys in zip(self.best.data,self.demandKeys):
+            print(self.nodes[keys[0]] +" : "+self.nodes[keys[1]])
+            for i,demand in enumerate(demands):
+                print("Path "+str(i) +" : "+str(math.ceil(self.demands[idx]*demand)) +" * "+str(len(self.demandPaths[idx][i])) +" = " + str(math.ceil(self.demands[idx]*demand)*len(self.demandPaths[idx][i])))
+            idx = idx +1
 
 if __name__ == "__main__":
 
