@@ -69,6 +69,9 @@ class Population:
         elemToMutate = int(len(gene.data) * self.mutationProb)
         indecies = np.random.choice(len(gene.data), elemToMutate, replace = False)
         for index in indecies:
+            # temp = np.random.uniform(low=0.0, high=10.0, size=len(gene.data[index])).astype(int)
+            # temp = temp / temp.sum(0)
+            # gene.data[index] = temp
             gene.data[index] = np.random.dirichlet(np.ones(len(gene.data[index])),size=1).squeeze()
 
     def mutateAgregation(self, gene: Gene) -> None:
@@ -94,6 +97,9 @@ class Population:
     def initGene(self, gene: Gene) -> None:
         demands = []
         for paths in self.demandPaths:
+                # temp = np.random.uniform(low=0.0, high=10.0, size=len(paths)).astype(int)
+                # temp = temp / temp.sum(0)
+                # demands.append(temp)
                 demands.append(np.random.dirichlet(np.ones(len(paths)),size=1).squeeze())
         gene.data = np.array(demands)
     

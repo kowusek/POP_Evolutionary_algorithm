@@ -3,8 +3,8 @@ import numpy as np
 import time
 import cProfile
 def main():
-    p = Population(100, 0)
-    p.startEvolution(0.1, 0.8, 10000, 1)
+    p = Population(100, False)
+    p.startEvolution(0.02, 8.0, 100, 1)
 
 if __name__=="__main__":
     #cProfile.run('main()')
