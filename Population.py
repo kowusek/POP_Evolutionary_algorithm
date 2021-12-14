@@ -210,7 +210,7 @@ class Population:
                 if gene.fitness < bestFitness:
                     bestFitness = gene.fitness
             self.genes += bestGenes
-            yield i, 
+            yield i,bestFitness
     def printBest(self):
         idx = 0
         for demands,keys in zip(self.best.data,self.demandKeys):
